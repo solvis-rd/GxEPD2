@@ -1,4 +1,4 @@
-# GxEPD2
+# SOLVIS GxEPD2
 ## Arduino Display Library for SPI E-Paper Displays
 
 - With full Graphics and Text support using Adafruit_GFX

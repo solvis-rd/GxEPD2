@@ -118,6 +118,8 @@ void GxEPD2_EPD::_reset()
 
 void GxEPD2_EPD::_waitWhileBusy(const char* comment, uint16_t busy_time)
 {
+  unsigned long micro_s = micros();
+  printf("\t\twaitWhileBusy\n");
   if (_busy >= 0)
   {
     delay(1); // add some margin to become active
@@ -133,25 +135,11 @@ void GxEPD2_EPD::_waitWhileBusy(const char* comment, uint16_t busy_time)
         Serial.println("Busy Timeout!");
         break;
       }
-#if defined(ESP8266) || defined(ESP32)
-      yield(); // avoid wdt
-#endif
     }
-    if (comment)
-    {
-#if !defined(DISABLE_DIAGNOSTIC_OUTPUT)
-      if (_diag_enabled)
-      {
-        unsigned long elapsed = micros() - start;
-        Serial.print(comment);
-        Serial.print(" : ");
-        Serial.println(elapsed);
-      }
-#endif
-    }
-    (void) start;
   }
   else delay(busy_time);
+  unsigned long micro_f = micros();
+  printf("\t\tend waitWhileBusy %d\n", micro_f - micro_s);
 }
 
 void GxEPD2_EPD::_writeCommand(uint8_t c)

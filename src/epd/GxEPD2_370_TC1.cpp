@@ -15,7 +15,7 @@
 #include "GxEPD2_370_TC1.h"
 
 GxEPD2_370_TC1::GxEPD2_370_TC1(int16_t cs, int16_t dc, int16_t rst, int16_t busy) :
-  GxEPD2_EPD(cs, dc, rst, busy, HIGH, 10000000, WIDTH, HEIGHT, panel, hasColor, hasPartialUpdate, hasFastPartialUpdate)
+  GxEPD2_EPD(cs, dc, rst, busy, HIGH, 4000000, WIDTH, HEIGHT, panel, hasColor, hasPartialUpdate, hasFastPartialUpdate)
 {
 }
 
@@ -87,6 +87,8 @@ void GxEPD2_370_TC1::_writeImage(uint8_t command, const uint8_t bitmap[], int16_
   if (!_using_partial_mode) _Init_Part();
   _setPartialRamArea(x1, y1, w1, h1);
   _writeCommand(command);
+  _pSPIx->beginTransaction(_spi_settings);
+  digitalWrite(_cs, LOW);
   for (int16_t i = 0; i < h1; i++)
   {
     for (int16_t j = 0; j < w1 / 8; j++)
@@ -107,9 +109,12 @@ void GxEPD2_370_TC1::_writeImage(uint8_t command, const uint8_t bitmap[], int16_
         data = bitmap[idx];
       }
       if (invert) data = ~data;
-      _writeData(data);
+      _pSPIx->transfer(data);
     }
   }
+  digitalWrite(_cs, HIGH);
+  _pSPIx->endTransaction();
+
   delay(1); // yield() to avoid WDT on ESP8266 and ESP32
 }
 
@@ -152,6 +157,8 @@ void GxEPD2_370_TC1::_writeImagePart(uint8_t command, const uint8_t bitmap[], in
   if (!_using_partial_mode) _Init_Part();
   _setPartialRamArea(x1, y1, w1, h1);
   _writeCommand(command);
+  _pSPIx->beginTransaction(_spi_settings);
+  digitalWrite(_cs, LOW);
   for (int16_t i = 0; i < h1; i++)
   {
     for (int16_t j = 0; j < w1 / 8; j++)
@@ -172,9 +179,11 @@ void GxEPD2_370_TC1::_writeImagePart(uint8_t command, const uint8_t bitmap[], in
         data = bitmap[idx];
       }
       if (invert) data = ~data;
-      _writeData(data);
+      _pSPIx->transfer(data);
     }
   }
+  digitalWrite(_cs, HIGH);
+  _pSPIx->endTransaction();
   delay(1); // yield() to avoid WDT on ESP8266 and ESP32
 }
 

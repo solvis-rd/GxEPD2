@@ -17,6 +17,7 @@
 GxEPD2_370_TC1::GxEPD2_370_TC1(int16_t cs, int16_t dc, int16_t rst, int16_t busy) :
   GxEPD2_EPD(cs, dc, rst, busy, HIGH, 4000000, WIDTH, HEIGHT, panel, hasColor, hasPartialUpdate, hasFastPartialUpdate)
 {
+  _init_part_powering = false;
 }
 
 void GxEPD2_370_TC1::clearScreen(uint8_t value)
@@ -444,6 +445,23 @@ void GxEPD2_370_TC1::_Init_Part()
   _writeDataPGM(lut_partial, sizeof(lut_partial));
   _PowerOn();
   _using_partial_mode = true;
+}
+
+void GxEPD2_370_TC1::NonStopInitPart()
+{
+  _InitDisplay();
+  _writeCommand(0x3C); // Border Waveform Control
+  _writeData(0xC0);    // HiZ, [POR], floating
+  _writeCommand(0x32);
+  _writeDataPGM(lut_partial, sizeof(lut_partial));
+
+  if (!_power_is_on)
+  {
+    _writeCommand(0x22);
+    _writeData(0xc0);
+    _writeCommand(0x20);
+    _init_part_powering = true;
+  }
 }
 
 void GxEPD2_370_TC1::_Update_Full()

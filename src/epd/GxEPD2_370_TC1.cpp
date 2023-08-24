@@ -459,9 +459,7 @@ void GxEPD2_370_TC1::_Update_Full()
 void GxEPD2_370_TC1::_Update_Part()
 {
   _writeCommand(0x22);
-  _writeData(0xcf); // enable clock, enable analog, display mode 2, disable analog, disable clock. Waveshare demo
-  //_writeData(0xc8); // enable clock, enable analog, display mode 2, ?
-  //_writeData(0xcc); // enable clock, enable analog, display mode 2, ?
+  _writeData(0x0c);
   _writeCommand(0x20);
   _waitWhileBusy("_Update_Part", partial_refresh_time);
 }

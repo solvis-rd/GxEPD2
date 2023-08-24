@@ -324,6 +324,13 @@ void GxEPD2_370_TC1::_setPartialRamArea(uint16_t x, uint16_t y, uint16_t w, uint
 
 void GxEPD2_370_TC1::_PowerOn()
 {
+  if(_init_part_powering)
+  {
+    _waitWhileBusy("_init_part_powering", power_off_time);
+    _power_is_on = true;
+    _init_part_powering = false;
+  }
+
   if (!_power_is_on)
   {
     _writeCommand(0x22);
@@ -336,6 +343,13 @@ void GxEPD2_370_TC1::_PowerOn()
 
 void GxEPD2_370_TC1::_PowerOff()
 {
+  if(_init_part_powering)
+  {
+    _waitWhileBusy("_init_part_powering", power_off_time);
+    _power_is_on = true;
+    _init_part_powering = false;
+  }
+
   if (_power_is_on)
   {
     _writeCommand(0x22);
@@ -427,6 +441,13 @@ const uint8_t GxEPD2_370_TC1::lut_partial[] PROGMEM =
 
 void GxEPD2_370_TC1::_Init_Full()
 {
+  if(_init_part_powering)
+  {
+    _waitWhileBusy("_init_part_powering", power_off_time);
+    _power_is_on = true;
+    _init_part_powering = false;
+  }
+
   _InitDisplay();
   _writeCommand(0x3C); // Border Waveform Control
   _writeData(0x01); // LUT1, for white
@@ -438,12 +459,21 @@ void GxEPD2_370_TC1::_Init_Full()
 
 void GxEPD2_370_TC1::_Init_Part()
 {
-  _InitDisplay();
-  _writeCommand(0x3C); // Border Waveform Control
-  _writeData(0xC0);    // HiZ, [POR], floating
-  _writeCommand(0x32);
-  _writeDataPGM(lut_partial, sizeof(lut_partial));
-  _PowerOn();
+  if(_init_part_powering)
+  {
+    _waitWhileBusy("_init_part_powering", power_off_time);
+    _power_is_on = true;
+    _init_part_powering = false;
+  }
+  else
+  {
+    _InitDisplay();
+    _writeCommand(0x3C); // Border Waveform Control
+    _writeData(0xC0);    // HiZ, [POR], floating
+    _writeCommand(0x32);
+    _writeDataPGM(lut_partial, sizeof(lut_partial));
+    _PowerOn();
+  }
   _using_partial_mode = true;
 }
 
@@ -476,8 +506,8 @@ void GxEPD2_370_TC1::_Update_Full()
 
 void GxEPD2_370_TC1::_Update_Part()
 {
-  _writeCommand(0x22);
+    _writeCommand(0x22);
   _writeData(0x0c);
   _writeCommand(0x20);
   _waitWhileBusy("_Update_Part", partial_refresh_time);
-}
+  }
